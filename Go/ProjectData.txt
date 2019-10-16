@@ -1,0 +1,12 @@
+Easiest.txt:
+- Solved just with constraint check
+- Number of definitive values at the beginning: 28
+- Number of possible combinations without constraint elimination: 9^53 = 3.757 * 10^50
+
+Gentle.txt:
+- Number of possibile combinations after constraint elimination: 3.144 * 10^28
+- Number of definitive values at the beginning: 26
+- Number of possible combinations without constraint elimination: 9^55 = 3.043 * 10^52
+
+General:
+- Number of possible combinations without definitive values: 9^81 = 1.966 * 10^77
