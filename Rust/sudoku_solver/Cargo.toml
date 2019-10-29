@@ -8,3 +8,5 @@ edition = "2018"
 
 [dependencies]
 crossbeam = "0.7"
+num-bigint = "0.2"
+num-traits = "0.2"

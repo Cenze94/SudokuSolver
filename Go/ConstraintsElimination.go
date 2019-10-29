@@ -21,7 +21,7 @@ func constraintsElimination(ioManager sudokuIOManager) {
 	boxesChannel := make(chan bool, 1)
 	// While there is at least one goroutine that updates one or more values, the three goroutines must be executed again
 	for horizontalUpdates || verticalUpdates || boxesUpdates {
-		// Start constraint deletion threads
+		// Start constraint elimination threads
 		go horizontalConstraintElimination(ioManager, horizontalChannel)
 		go verticalConstraintElimination(ioManager, verticalChannel)
 		go boxesConstraintElimination(ioManager, boxesChannel)

@@ -22,8 +22,8 @@ func bruteForceSolving(ioManager sudokuIOManager) sudokuIOManager {
 	return newManager
 }
 
-// Recursive function, call as a subroutine in order to parallelize the search
-func searchSolution(sudoku [9][9][]int, solutionChannel chan [9][9][]int, stopChannel <-chan bool) {
+// Recursive function, called as a subroutine in order to parallelize the search
+func searchSolution(sudoku [9][9][]int, solutionChannel chan [9][9][]int, stopChannel chan bool) {
 	i := 0
 	j := 0
 	// Find the first cell without a definitive value, if it doesn't exist then "i" will reach the value 9
@@ -31,6 +31,7 @@ func searchSolution(sudoku [9][9][]int, solutionChannel chan [9][9][]int, stopCh
 		// If there is a signal of stop, kill the goroutine
 		select {
 		case <-stopChannel:
+			stopChannel <- true
 			return
 		default:
 			j++
@@ -50,6 +51,7 @@ func searchSolution(sudoku [9][9][]int, solutionChannel chan [9][9][]int, stopCh
 			// If there is a signal of stop, kill the goroutine
 			select {
 			case <-stopChannel:
+				stopChannel <- true
 				return
 			default:
 				// Copy the sudoku matrix

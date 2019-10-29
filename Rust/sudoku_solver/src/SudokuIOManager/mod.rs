@@ -1,6 +1,8 @@
 extern crate crossbeam;
 use crossbeam::crossbeam_channel::{Receiver, Sender, Select, unbounded};
 use super::SudokuManager::sudoku;
+use std::sync::{Arc, RwLock};
+use std::thread;
 
 // Contain the variables needed to delete a specific value from a given cell
 struct sudokuDeleteNumber {
@@ -25,46 +27,6 @@ impl sudokuIOManager {
         let (sendSudokuSender, sendSudokuReceiver) = unbounded();
         return sudokuIOManager{sudokuVar, deleteSender, deleteReceiver,
             requestSudokuSender, requestSudokuReceiver, sendSudokuSender, sendSudokuReceiver
-        }
-    }
-
-    // Run method of sudokuIOManager, for every value to delete check if the number exists (because of the
-    // execution of multiple concurrent threads)
-    pub fn Run(&mut self) {
-        let mut sel = Select::new();
-        sel.recv(&self.requestSudokuReceiver);
-        // Otherwise wait and delete the next value
-        sel.recv(&self.deleteReceiver);
-
-        loop {
-            let index = sel.ready();
-            // Check if there is a request of a copy of the sudoku
-            if index == 0 {
-                let res = self.requestSudokuReceiver.try_recv();
-                // If the operation turns out not to be ready, retry
-                if let Err(e) = res {
-                    if e.is_empty() {
-                        continue;
-                    }
-                }
-
-                let mut matrixCopy: [[Vec<i8>; 9]; 9] = Default::default();
-                for i in 0..9 {
-                    for j in 0..9 {
-                        for z in 0..self.sudokuVar.sudokuMatrix[i][j].len() {
-                            matrixCopy[i][j].push(self.sudokuVar.sudokuMatrix[i][j][z]);
-                        }
-                    }
-                }
-                self.sendSudokuSender.send(matrixCopy).unwrap();
-            } else {
-                // Otherwise wait and delete the next value
-                let res = self.deleteReceiver.try_recv().unwrap();
-
-                if self.sudokuVar.checkCellValue(res.row, res.column, res.value) {
-                    self.sudokuVar.deleteCellValue(res.row, res.column, res.value);
-                }
-            }
         }
     }
 
@@ -93,4 +55,52 @@ impl sudokuIOManager {
     pub fn PrintSudoku(&self) {
         self.sudokuVar.printSudoku();
     }
+}
+
+// Run method of sudokuIOManager, for every value to delete check if the number exists (because of the
+// execution of multiple concurrent threads)
+pub fn Run(ioManagerPointer: Arc<RwLock<sudokuIOManager>>) {
+    thread::spawn(move || {
+        loop {
+            let ioManager = ioManagerPointer.read().unwrap();
+            let mut sel = Select::new();
+            sel.recv(&ioManager.requestSudokuReceiver);
+            // Otherwise wait and delete the next value
+            sel.recv(&ioManager.deleteReceiver);
+
+            let index = sel.ready();
+            // Check if there is a request of a copy of the sudoku
+            if index == 0 {
+                {
+                    let res = ioManager.requestSudokuReceiver.try_recv();
+                    // If the operation turns out not to be ready, retry
+                    if let Err(e) = res {
+                        if e.is_empty() {
+                            continue;
+                        }
+                    }
+
+                    let mut matrixCopy: [[Vec<i8>; 9]; 9] = Default::default();
+                    for i in 0..9 {
+                        for j in 0..9 {
+                            for z in 0..ioManager.sudokuVar.sudokuMatrix[i][j].len() {
+                                matrixCopy[i][j].push(ioManager.sudokuVar.sudokuMatrix[i][j][z]);
+                            }
+                        }
+                    }
+                    ioManager.sendSudokuSender.send(matrixCopy).unwrap();
+                }
+            } else {
+                // Release the read lock
+                drop(ioManager);
+                let mut ioManager = ioManagerPointer.write().unwrap();
+                // Otherwise wait and delete the next value
+                let res = ioManager.deleteReceiver.try_recv().unwrap();
+
+                if ioManager.sudokuVar.checkCellValue(res.row, res.column, res.value) {
+                    ioManager.sudokuVar.deleteCellValue(res.row, res.column, res.value);
+                }
+            }
+        }
+    });
 }

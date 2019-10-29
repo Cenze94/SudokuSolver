@@ -1,5 +1,4 @@
 use std::fs;
-use std::io::{self, Write};
 
 pub struct sudoku {
     // The first 2 dimensions are the rows and the columns of the sudoku, the third contains all the possible values of the cell
@@ -23,7 +22,7 @@ impl sudoku {
     }
 
     // Sudoku constructor, which saves a sudokuMatrix in a new container
-    pub fn newContainer(sudokuMatrix:[[Vec<i8>; 9]; 9]) -> sudoku {
+    pub fn newContainer(sudokuMatrix: [[Vec<i8>; 9]; 9]) -> sudoku {
         return sudoku{sudokuMatrix};
     }
 
