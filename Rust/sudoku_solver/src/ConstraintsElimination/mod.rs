@@ -29,6 +29,7 @@ pub fn constraintsElimination(ioManager: Arc<RwLock<sudokuIOManager>>) {
     let verticalChannelSender = Arc::new(Mutex::new(verticalChannelSender));
     let boxesChannelSender = Arc::new(Mutex::new(boxesChannelSender));
 
+    // While there is at least one thread that updates one or more values, the three threads must be executed again
     while horizontalUpdates || verticalUpdates || boxesUpdates {
         crossbeam::scope(|scope| {
             // Start constraint elimination threads
@@ -43,6 +44,7 @@ pub fn constraintsElimination(ioManager: Arc<RwLock<sudokuIOManager>>) {
             scope.spawn(move |_var| boxesConstraintElimination(manager, channelSenderClone));
         });
 
+        // Save the response of every channel in the respective boolean variable
         horizontalUpdates = horizontalChannelReceiver.recv().unwrap();
         verticalUpdates = verticalChannelReceiver.recv().unwrap();
         boxesUpdates = boxesChannelReceiver.recv().unwrap();
@@ -100,16 +102,16 @@ pub fn verticalConstraintElimination(ioManager: Arc<RwLock<sudokuIOManager>>, up
                 // Delete the value for the previous cells without definitive values
                 for z in 0..i {
                     let readManager = ioManager.read().unwrap();
-                    if readManager.GetSlice(i, z).len() > 1 && readManager.CheckNumber(i, z, cellValue) {
-                        readManager.DeleteNumber(i, z, cellValue);
+                    if readManager.GetSlice(z, j).len() > 1 && readManager.CheckNumber(z, j, cellValue) {
+                        readManager.DeleteNumber(z, j, cellValue);
                         updates = true;
                     }
                 }
                 // Delete the value for the next cells without definitive values
                 for z in i+1..9 {
                     let readManager = ioManager.read().unwrap();
-                    if readManager.GetSlice(i, z).len() > 1 && readManager.CheckNumber(i, z, cellValue) {
-                        readManager.DeleteNumber(i, z, cellValue);
+                    if readManager.GetSlice(z, j).len() > 1 && readManager.CheckNumber(z, j, cellValue) {
+                        readManager.DeleteNumber(z, j, cellValue);
                         updates = true;
                     }
                 }

@@ -92,7 +92,7 @@ func findVerticalNakedPairs(ioManager sudokuIOManager, updatesChannel chan bool)
 			combinationsList := getCombinations(validCellsPosition, 2, 0)
 			// Only the first valid combination is considered (with the check of validCombination variable) because the following will be invalid
 			for z := 0; z < len(combinationsList) && !validCombination; z++ {
-				// Save the indexes of the analyzed cells columns in specific variables for convenience
+				// Save the indexes of the analyzed cells rows in specific variables for convenience
 				firstValuePosition := combinationsList[z][0]
 				secondValuePosition := combinationsList[z][1]
 				// Check if the two possible values of the first cell of the combination are the same of the second cell

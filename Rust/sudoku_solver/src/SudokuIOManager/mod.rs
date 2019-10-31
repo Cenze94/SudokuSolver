@@ -63,42 +63,36 @@ pub fn Run(ioManagerPointer: Arc<RwLock<sudokuIOManager>>) {
     thread::spawn(move || {
         loop {
             let ioManager = ioManagerPointer.read().unwrap();
-            let mut sel = Select::new();
-            sel.recv(&ioManager.requestSudokuReceiver);
-            // Otherwise wait and delete the next value
-            sel.recv(&ioManager.deleteReceiver);
-
-            let index = sel.ready();
+            let srRes = ioManager.requestSudokuReceiver.try_recv();
             // Check if there is a request of a copy of the sudoku
-            if index == 0 {
-                {
-                    let res = ioManager.requestSudokuReceiver.try_recv();
-                    // If the operation turns out not to be ready, retry
-                    if let Err(e) = res {
-                        if e.is_empty() {
-                            continue;
-                        }
-                    }
+            if srRes.is_ok() {
+                let res = srRes.unwrap();
 
-                    let mut matrixCopy: [[Vec<i8>; 9]; 9] = Default::default();
-                    for i in 0..9 {
-                        for j in 0..9 {
-                            for z in 0..ioManager.sudokuVar.sudokuMatrix[i][j].len() {
-                                matrixCopy[i][j].push(ioManager.sudokuVar.sudokuMatrix[i][j][z]);
-                            }
+                // Create and send the sudoku copy
+                let mut matrixCopy: [[Vec<i8>; 9]; 9] = Default::default();
+                for i in 0..9 {
+                    for j in 0..9 {
+                        for z in 0..ioManager.sudokuVar.sudokuMatrix[i][j].len() {
+                            matrixCopy[i][j].push(ioManager.sudokuVar.sudokuMatrix[i][j][z]);
                         }
                     }
-                    ioManager.sendSudokuSender.send(matrixCopy).unwrap();
                 }
+                ioManager.sendSudokuSender.send(matrixCopy).unwrap();
             } else {
-                // Release the read lock
+                // Release the read lock and try to take the write one
                 drop(ioManager);
-                let mut ioManager = ioManagerPointer.write().unwrap();
-                // Otherwise wait and delete the next value
-                let res = ioManager.deleteReceiver.try_recv().unwrap();
-
-                if ioManager.sudokuVar.checkCellValue(res.row, res.column, res.value) {
-                    ioManager.sudokuVar.deleteCellValue(res.row, res.column, res.value);
+                let result = ioManagerPointer.try_write();
+                if result.is_ok() {
+                    let mut ioManager = result.unwrap();
+                    // Check if there is an element to delete
+                    let recRes = ioManager.deleteReceiver.try_recv();
+                    if recRes.is_ok() {
+                        let res = recRes.unwrap();
+                        // Delete the element
+                        if ioManager.sudokuVar.checkCellValue(res.row, res.column, res.value) {
+                            ioManager.sudokuVar.deleteCellValue(res.row, res.column, res.value);
+                        }
+                    }
                 }
             }
         }

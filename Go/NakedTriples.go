@@ -120,7 +120,7 @@ func findVerticalNakedTriples(ioManager sudokuIOManager, updatesChannel chan boo
 			combinationsList := getCombinations(validCellsPosition, 3, 0)
 			// Only the first valid combination is considered (with the check of validCombination variable) because the following will be invalid
 			for z := 0; z < len(combinationsList) && !validCombination; z++ {
-				// Save the indexes of the analyzed cells columns in specific variables for convenience
+				// Save the indexes of the analyzed cells rows in specific variables for convenience
 				firstValuePosition := combinationsList[z][0]
 				secondValuePosition := combinationsList[z][1]
 				thirdValuePosition := combinationsList[z][2]
@@ -194,7 +194,7 @@ func findBoxesNakedTriples(ioManager sudokuIOManager, updatesChannel chan bool) 
 				combinationsList := getCombinations(validCellsPosition, 3, 0)
 				// Only the first valid combination is considered (with the check of validCombination variable) because the following will be invalid
 				for z := 0; z < len(combinationsList) && !validCombination; z++ {
-					// Save the indexes of the analyzed cells rows in specific variables for convenience
+					// Save the indexes of the analyzed cells rows and columns in specific variables for convenience
 					firstValueRowPosition := combinationsList[z][0] / 3
 					firstValueColumnPosition := combinationsList[z][0] % 3
 					secondValueRowPosition := combinationsList[z][1] / 3
@@ -239,6 +239,7 @@ func findBoxesNakedTriples(ioManager sudokuIOManager, updatesChannel chan bool) 
 									ioManager.DeleteNumber(i*3+ib, j*3+jb, values[1])
 									ioManager.DeleteNumber(i*3+ib, j*3+jb, values[2])
 									updates = true
+									validCombination = true
 								}
 							}
 						}

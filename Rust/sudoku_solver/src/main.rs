@@ -1,4 +1,3 @@
-use std::thread;
 use std::sync::{Arc, RwLock};
 mod SudokuIOManager;
 use SudokuIOManager::sudokuIOManager;
@@ -10,6 +9,10 @@ mod BruteForceMethods;
 use BruteForceMethods::bruteForceSolving;
 mod ConstraintsElimination;
 use ConstraintsElimination::constraintsElimination;
+mod NakedPairs;
+use NakedPairs::findNakedPairs;
+mod NakedTriples;
+use NakedTriples::findNakedTriples;
 
 fn main() {
     let testBruteForce = false;
@@ -62,6 +65,20 @@ fn main() {
 
         // Delete the invalid constraints
         constraintsElimination(ioManagerPointer.clone());
+        {
+            let ioManager = ioManagerPointer.read().unwrap();
+            ioManager.PrintSudoku();
+            println!{"\n\n"};
+        }
+
+        findNakedPairs(ioManagerPointer.clone());
+        {
+            let ioManager = ioManagerPointer.read().unwrap();
+            ioManager.PrintSudoku();
+            println!{"\n\n"};
+        }
+
+        findNakedTriples(ioManagerPointer.clone());
         {
             let ioManager = ioManagerPointer.read().unwrap();
             ioManager.PrintSudoku();
