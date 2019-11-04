@@ -1,0 +1,14 @@
+cl /EHsc /I C:\Users\Andrea\AppData\Local\Programs\Python\Python37\include _sudokusolver. C:\Users\Andrea\AppData\Local\Programs\Python\Python37\libs\python3.lib
+
+go build --buildmode=c-archive -o libsudokusolver.a
+
+go build -o SudokuSolver.exe
+./SudokuSolver
+
+cargo build (dalla directory principale, non dalla cartella "src")
+.\target\debug\sudoku_solver.exe
+Le due operazioni possono essere fatte insieme con "cargo run".
+Si può usare "cargo check" per compilare senza produrre l'eseguibile (di solito è più veloce del build)
+
+env RUSTFLAGS="-A warnings" cargo build
+Permette di evitare la segnalazione dei warnings.
