@@ -1,6 +1,7 @@
 extern crate crossbeam;
 use crossbeam::crossbeam_channel::{Sender, bounded};
 use std::sync::{Arc, RwLock, Mutex};
+use std::time::SystemTime;
 use super::SudokuIOManager::{sudokuIOManager, Run};
 use super::SudokuManager::sudoku;
 
@@ -15,6 +16,7 @@ pub fn sudokuConstraintsElimination(sudoku: [[Vec<i8>; 9]; 9]) -> [[Vec<i8>; 9];
 
 // Delete all the horizontal, vertical and boxes invalid constraints
 pub fn constraintsElimination(ioManager: Arc<RwLock<sudokuIOManager>>) {
+    let start = SystemTime::now();
     // Booleans to check if there are deleted values in the following threads
     let mut horizontalUpdates = true;
     let mut verticalUpdates = true;
@@ -49,6 +51,7 @@ pub fn constraintsElimination(ioManager: Arc<RwLock<sudokuIOManager>>) {
         verticalUpdates = verticalChannelReceiver.recv().unwrap();
         boxesUpdates = boxesChannelReceiver.recv().unwrap();
     }
+    println!("ConstraintsElimination time: {}", (SystemTime::now().duration_since(start).expect("Time")).as_micros());
 }
 
 // Delete horizontal constraints, updates signals if there are deleted values

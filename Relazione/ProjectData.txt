@@ -10,3 +10,11 @@ Gentle.txt:
 
 General:
 - Number of possible combinations without definitive values: 9^81 = 1.966 * 10^77
+
+Execution Time (µs):
+  Go:
+    Main: 59831 53857 63829 60843 64813
+    ConstraintsElimination: 997 1001 997 998 996
+  Rust:
+    Main: 217094 150107 93748 86763 103698
+    ConstraintsElimination: 4014 1993 2990 21618 2993

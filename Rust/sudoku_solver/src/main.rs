@@ -1,4 +1,5 @@
 use std::sync::{Arc, RwLock};
+use std::time::SystemTime;
 mod SudokuIOManager;
 use SudokuIOManager::sudokuIOManager;
 mod SudokuManager;
@@ -16,6 +17,7 @@ use NakedTriples::findNakedTriples;
 
 fn main() {
     let testBruteForce = false;
+    let start = SystemTime::now();
 
     if testBruteForce {
         // Load sudoku from file
@@ -112,4 +114,5 @@ fn main() {
             }
         }
     }
+    println!("Main time: {}", (SystemTime::now().duration_since(start).expect("Time")).as_micros());
 }

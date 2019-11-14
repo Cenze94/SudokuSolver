@@ -1,5 +1,11 @@
 package main
 
+import (
+	"fmt"
+	"strconv"
+	"time"
+)
+
 // Create a sudokuIOManager and call the function below
 func sudokuConstraintsElimination(sudoku [9][9][]int) {
 	sudokuContainer := newContainer(sudoku)
@@ -11,6 +17,7 @@ func sudokuConstraintsElimination(sudoku [9][9][]int) {
 
 // Delete all the horizontal, vertical and boxes invalid constraints
 func constraintsElimination(ioManager sudokuIOManager) {
+	start := time.Now().UnixNano()
 	// Booleans to check if there are deleted values in the following goroutines
 	horizontalUpdates := true
 	verticalUpdates := true
@@ -31,6 +38,7 @@ func constraintsElimination(ioManager sudokuIOManager) {
 		verticalUpdates = <-verticalChannel
 		boxesUpdates = <-boxesChannel
 	}
+	fmt.Println("ConstraintsElimination time: " + strconv.FormatInt((time.Now().UnixNano()-start)/int64(time.Microsecond), 10))
 }
 
 // Delete horizontal constraints, updates signals if there are deleted values

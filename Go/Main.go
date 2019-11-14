@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+	"strconv"
+	"time"
 )
 
 func main() {
 	testBruteForce := false
+	start := time.Now().UnixNano()
 
 	if testBruteForce {
 		// Load sudoku from file
@@ -72,4 +75,5 @@ func main() {
 			}
 		}
 	}
+	fmt.Println("Main time: " + strconv.FormatInt((time.Now().UnixNano()-start) / int64(time.Microsecond), 10))
 }
